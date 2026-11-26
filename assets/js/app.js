@@ -41,6 +41,8 @@
   let activeBook = null;
   let lastFocus = null;
   let activePanel = null;
+  let closingPanel = null;
+  let closingTimer = null;
 
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -183,7 +185,7 @@
     $('detail-author').textContent = displayAuthor(book.author);
     $('detail-title').textContent = book.title;
     $('detail-description').textContent = book.description || '';
-    $('detail-description').hidden = !book.description;
+    $('detail-description').hidden = false;
     $('detail-price').textContent = money(book.price);
     const extras = [];
     if (book.edition) extras.push(`издание: ${book.edition}`);
@@ -192,26 +194,43 @@
     updateDetailAction();
     openPanel($('book-detail'));
   }
+  function finishClose(panel, restore) {
+    panel.hidden = true;
+    panel.classList.remove('is-closing');
+    if (closingPanel === panel) closingPanel = null;
+    if (!activePanel) {
+      $('overlay').hidden = true;
+      $('overlay').classList.remove('is-closing');
+      document.body.classList.remove('modal-open');
+      if (restore && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
+    }
+  }
   function openPanel(panel) {
-    if (activePanel) closePanel(false);
+    if (closingTimer) { clearTimeout(closingTimer); closingTimer = null; }
+    if (closingPanel) finishClose(closingPanel, false);
+    if (activePanel) finishClose(activePanel, false);
     lastFocus = document.activeElement;
     panel.classList.remove('is-closing');
-    panel.hidden = false; $('overlay').hidden = false;
-    document.body.classList.add('modal-open'); activePanel = panel;
-    panel.querySelector('.icon-button')?.focus();
+    $('overlay').classList.remove('is-closing');
+    panel.hidden = false;
+    $('overlay').hidden = false;
+    document.body.classList.add('modal-open');
+    activePanel = panel;
+    panel.querySelector('.icon-button')?.focus({ preventScroll: true });
   }
   function closePanel(restore = true) {
     if (!activePanel) return;
     const panel = activePanel;
+    activePanel = null;
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) panel.hidden = true;
-    else {
-      panel.classList.add('is-closing');
-      setTimeout(() => { if (panel.classList.contains('is-closing')) { panel.hidden = true; panel.classList.remove('is-closing'); } }, 190);
-    }
-    $('overlay').hidden = true;
-    document.body.classList.remove('modal-open'); activePanel = null;
-    if (restore && lastFocus?.isConnected) lastFocus.focus();
+    if (reduceMotion) { finishClose(panel, restore); return; }
+    closingPanel = panel;
+    panel.classList.add('is-closing');
+    $('overlay').classList.add('is-closing');
+    closingTimer = setTimeout(() => {
+      closingTimer = null;
+      finishClose(panel, restore);
+    }, 170);
   }
   function trapFocus(event) {
     if (!activePanel || event.key !== 'Tab') return;
