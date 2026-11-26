@@ -4,6 +4,12 @@
   const config = window.COGNITIO_CONFIG || {};
   const storageKey = 'cognitioverum:selected:v1';
   const pageSize = 16;
+  const genreOrder = [
+    'Классическая литература', 'Современная проза', 'Детективы и триллеры',
+    'Фантастика и фэнтези', 'Мистика и ужасы', 'Любовные романы',
+    'Детская литература', 'Поэзия', 'Психология', 'Саморазвитие',
+    'Философия', 'Нон-фикшн', 'Эзотерика', 'Карты Таро'
+  ];
   const collator = new Intl.Collator('ru', { sensitivity: 'base' });
   const money = amount => `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount)} ₾`;
   // Только отображение: исходные значения автора в JSON остаются без изменений.
@@ -110,7 +116,7 @@
     bottom.append(create('strong', 'card-price', money(book.price)), add);
     info.append(create('p', 'card-author', displayAuthor(book.author)), title);
     if (book.description) info.append(create('p', 'card-description', book.description));
-    if (book.category) info.append(create('p', 'card-category', book.category));
+    if (book.genres?.length) info.append(create('p', 'card-category', book.genres.join(' · ')));
     info.append(bottom);
     card.append(open, info);
     return card;
@@ -119,7 +125,7 @@
     const query = $('search').value.trim().toLocaleLowerCase('ru');
     const category = $('category').value;
     const sort = $('sort').value;
-    const list = books.filter(book => available(book) && (!category || book.category === category) && (!query || `${book.author} ${displayAuthor(book.author)} ${book.title}`.toLocaleLowerCase('ru').includes(query)));
+    const list = books.filter(book => available(book) && (!category || book.genres.includes(category)) && (!query || `${book.author} ${displayAuthor(book.author)} ${book.title}`.toLocaleLowerCase('ru').includes(query)));
     if (sort === 'az') list.sort((a, b) => collator.compare(a.title, b.title) || collator.compare(a.author, b.author));
     if (sort === 'price-asc') list.sort((a, b) => a.price - b.price || collator.compare(a.title, b.title));
     if (sort === 'price-desc') list.sort((a, b) => b.price - a.price || collator.compare(a.title, b.title));
@@ -179,8 +185,8 @@
   function showDetail(book) {
     activeBook = book;
     $('detail-cover').replaceChildren(cover(book, true));
-    $('detail-category').textContent = book.category || '';
-    $('detail-category').hidden = !book.category;
+    $('detail-category').textContent = book.genres.join(' · ');
+    $('detail-category').hidden = book.genres.length === 0;
     $('detail-author').textContent = displayAuthor(book.author);
     $('detail-title').textContent = book.title;
     $('detail-description').textContent = book.description || '';
@@ -317,9 +323,9 @@
 
     fetch('data/books.json', { cache: 'no-store' }).then(response => { if (!response.ok) throw Error('catalog unavailable'); return response.json(); }).then(data => {
       if (!Array.isArray(data)) throw Error('invalid catalog');
-      books = data.filter(book => book && typeof book.id === 'string' && typeof book.author === 'string' && typeof book.title === 'string' && Number.isFinite(book.price) && book.price >= 0);
+      books = data.filter(book => book && typeof book.id === 'string' && typeof book.author === 'string' && typeof book.title === 'string' && Number.isFinite(book.price) && book.price >= 0 && Array.isArray(book.genres));
       const availableBooks = books.filter(available);
-      const categories = [...new Set(availableBooks.map(book => book.category).filter(Boolean))].sort(collator.compare);
+      const categories = genreOrder.filter(genre => availableBooks.some(book => book.genres.includes(genre)));
       $('category').append(...categories.map(category => { const option = create('option', '', category); option.value = category; return option; }));
       $('category').disabled = categories.length === 0;
       syncCategoryMenu();

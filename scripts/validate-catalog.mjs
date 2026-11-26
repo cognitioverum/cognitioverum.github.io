@@ -4,6 +4,12 @@ const books = JSON.parse(readFileSync(new URL('../data/books.json', import.meta.
 if (!Array.isArray(books)) throw Error('books.json must contain an array');
 const ids = new Set();
 const images = new Set();
+const allowedGenres = new Set([
+  'Классическая литература', 'Современная проза', 'Детективы и триллеры',
+  'Фантастика и фэнтези', 'Мистика и ужасы', 'Любовные романы',
+  'Детская литература', 'Поэзия', 'Психология', 'Саморазвитие',
+  'Философия', 'Нон-фикшн', 'Эзотерика', 'Карты Таро'
+]);
 let pendingImages = 0;
 for (const book of books) {
   if (!book.id || ids.has(book.id)) throw Error(`duplicate or missing ID: ${book.id}`);
@@ -12,6 +18,10 @@ for (const book of books) {
   if (!Number.isFinite(book.price) || book.price < 0) throw Error(`invalid price: ${book.id}`);
   if (!Number.isInteger(book.quantity) || book.quantity < 0) throw Error(`invalid quantity: ${book.id}`);
   if (book.status !== (book.quantity > 0 ? 'available' : 'sold')) throw Error(`status/quantity mismatch: ${book.id}`);
+  if ('category' in book || !Array.isArray(book.genres) || book.genres.length === 0 ||
+      new Set(book.genres).size !== book.genres.length ||
+      book.genres.some(genre => typeof genre !== 'string' || !allowedGenres.has(genre)))
+    throw Error(`invalid genres: ${book.id}`);
   if (typeof book.description !== 'string' || book.description.length > 70) throw Error(`invalid description: ${book.id}`);
   for (const key of ['author', 'title', 'description']) {
     if (book[key] !== book[key].trim()) throw Error(`extra whitespace: ${book.id} ${key}`);
