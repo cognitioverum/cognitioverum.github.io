@@ -29,13 +29,16 @@
     if (value != null) node.textContent = value;
     return node;
   }
-  function cover(book) {
+  function cover(book, detail = false) {
     const frame = create('div', 'cover');
     if (typeof book.image === 'string' && /^assets\/images\/books\/[\w.-]+\.(webp|jpe?g|png)$/i.test(book.image)) {
       const image = create('img');
-      image.src = book.image;
+      image.width = 288;
+      image.height = 385;
       image.alt = `обложка книги «${book.title}»`;
-      image.loading = 'lazy';
+      image.loading = detail ? 'eager' : 'lazy';
+      image.decoding = 'async';
+      image.src = book.image;
       image.onerror = () => { image.remove(); frame.append(placeholder()); };
       frame.append(image);
     } else frame.append(placeholder());
@@ -168,7 +171,7 @@
   }
   function showDetail(book) {
     activeBook = book;
-    $('detail-cover').replaceChildren(cover(book));
+    $('detail-cover').replaceChildren(cover(book, true));
     $('detail-category').textContent = book.category || '';
     $('detail-category').hidden = !book.category;
     $('detail-author').textContent = book.author;
