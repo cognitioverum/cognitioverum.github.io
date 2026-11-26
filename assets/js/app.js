@@ -141,6 +141,28 @@
     $('load-more').hidden = list.length <= visibleLimit;
   }
   function selectionBooks() { return books.filter(book => selected.has(book.id) && available(book)); }
+  function selectionMessage() {
+    const items = selectionBooks();
+    const copies = items.reduce((sum, book) => sum + selected.get(book.id), 0);
+    const total = items.reduce((sum, book) => sum + book.price * selected.get(book.id), 0);
+    const noun = copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг';
+    const list = items.map(book => {
+      const quantity = selected.get(book.id);
+      return `• ${displayAuthor(book.author)}, «${book.title}»${quantity > 1 ? ` × ${quantity}` : ''} — ${money(book.price * quantity)}`;
+    });
+    return ['добрый день! ☀️', '', 'интересуют следующие книги:', '', ...list, '',
+      `всего: ${copies} ${noun} на сумму ${money(total)}.`, '',
+      'подскажите, пожалуйста, есть ли они в наличии и по какому адресу можно их забрать? 📚'].join('\n');
+  }
+  function updateContactLinks() {
+    const message = encodeURIComponent(selectionMessage());
+    const telegram = config.telegramUsername || 'ribka_27';
+    const whatsapp = config.whatsappPhone
+      ? `https://wa.me/${config.whatsappPhone}`
+      : (config.whatsappUrl || 'https://wa.me/message/MKN3QRCW27DUF1');
+    $('telegram-button').href = `https://t.me/${telegram}?text=${message}`;
+    $('whatsapp-button').href = `${whatsapp}${whatsapp.includes('?') ? '&' : '?'}text=${message}`;
+  }
   function renderSelection() {
     const items = selectionBooks();
     const copies = items.reduce((sum, book) => sum + selected.get(book.id), 0);
@@ -316,8 +338,12 @@
     document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closePanel()));
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); trapFocus(event); });
     $('detail-add').addEventListener('click', () => toggle(activeBook.id));
-    $('telegram-button').href = `https://t.me/${config.telegramUsername || 'ribka_27'}`;
-    $('whatsapp-button').href = config.whatsappUrl || 'https://wa.me/message/MKN3QRCW27DUF1';
+    for (const id of ['telegram-button', 'whatsapp-button']) {
+      $(id).addEventListener('click', event => {
+        if (!selectionBooks().length) { event.preventDefault(); return; }
+        updateContactLinks();
+      });
+    }
     for (const id of ['search', 'category', 'sort']) $(id).addEventListener(id === 'search' ? 'input' : 'change', () => { visibleLimit = pageSize; renderCatalog(); });
     $('load-more').addEventListener('click', () => { visibleLimit += pageSize; renderCatalog(); });
 
