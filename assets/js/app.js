@@ -192,8 +192,15 @@
     updateDetailAction();
     openPanel($('book-detail'));
   }
+  let drawerCloseTimer = null;
   function openPanel(panel) {
-    if (activePanel) closePanel(false);
+    if (drawerCloseTimer) {
+      clearTimeout(drawerCloseTimer);
+      drawerCloseTimer = null;
+      $('selection-drawer').hidden = true;
+      $('selection-drawer').classList.remove('is-closing');
+    }
+    if (activePanel) activePanel.hidden = true;
     lastFocus = document.activeElement;
     panel.hidden = false;
     $('overlay').hidden = false;
@@ -203,11 +210,21 @@
   }
   function closePanel(restore = true) {
     if (!activePanel) return;
-    activePanel.hidden = true;
-    $('overlay').hidden = true;
-    document.body.classList.remove('modal-open');
+    const panel = activePanel;
     activePanel = null;
-    if (restore && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
+    const finish = () => {
+      panel.hidden = true;
+      panel.classList.remove('is-closing');
+      if (!activePanel) {
+        $('overlay').hidden = true;
+        document.body.classList.remove('modal-open');
+        if (restore && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
+      }
+    };
+    if (panel.id === 'selection-drawer' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      panel.classList.add('is-closing');
+      drawerCloseTimer = setTimeout(() => { drawerCloseTimer = null; finish(); }, 180);
+    } else finish();
   }
   function trapFocus(event) {
     if (!activePanel || event.key !== 'Tab') return;
