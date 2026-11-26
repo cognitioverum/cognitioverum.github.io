@@ -6,6 +6,35 @@
   const pageSize = 16;
   const collator = new Intl.Collator('ru', { sensitivity: 'base' });
   const money = amount => `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount)} ₾`;
+  // Только отображение: исходные значения автора в JSON остаются без изменений.
+  const surnameFirst = new Set([
+    'Кристи Агата','Стейнбек Джон','Стоун Ирвинг','Кэрролл Льюис','Хокинг Стивен',
+    'Фрейд Зигмунд','Юнг Карл Густав','Фромм Эрих','Спаркс Николас','Кинг Стивен',
+    'Карнеги Дейл','Гете Иоганн Вольфганг','Берджесс Энтони','Коэльо Пауло',
+    'Ремарк Эрих Мария','Фицджеральд Френсис Скотт','Хаксли Олдос','Рызов Игорь',
+    'Наказава Донна Джексон','Диспенза Джо','Пелевин Виктор','Водолазкин Евгений',
+    'Франкл Виктор','Берн Эрик','Чалдини Роберт','Безруков Виталий',
+    'Канеман Даниэль','Кови Стивен','Норбеков Мирзакарим','Франкл Виктор Эмиль',
+    'Кавашима Рюта','Кехо Джон','Макгонигал Келли','Король Александр',
+    'Литвак Михаил','Айзексон Уолтер','Фрейд Анна','Пропп Владимир',
+    'Кэмпбелл Джозеф','Брэдбери Рэй','Булгаков Михаил','Гоголь Николай Васильевич',
+    'Достоевский Федор Михайлович','Пушкин Александр Сергеевич',
+    'Чехов Антон Павлович','Шмидт Тамара','Эгер Эдит Ева','Фаулз Джон',
+    'Федоренко Павел','Берн Р.','Мэрфи Д.','Гоголь Н.В.'
+  ]);
+  const authorOverrides = new Map([
+    ['Стругацкий Аркадий, Стругацкий Борис', 'Аркадий и Борис Стругацкие'],
+    ['Пиз Аллан, Пиз Барбара', 'Аллан и Барбара Пиз'],
+    ['Нурмагомедов Адбулманап, Рыбаков Игорь', 'Адбулманап Нурмагомедов, Игорь Рыбаков'],
+    ['Хансон Рик, Мендиус Ричард', 'Рик Хансон, Ричард Мендиус'],
+    ['Лабковский Михаил и др.', 'Михаил Лабковский и др.']
+  ]);
+  function displayAuthor(author) {
+    if (authorOverrides.has(author)) return authorOverrides.get(author);
+    if (!surnameFirst.has(author)) return author;
+    const [surname, ...names] = author.split(' ');
+    return `${names.join(' ')} ${surname}`;
+  }
   let books = [];
   let selected = new Map();
   let visibleLimit = pageSize;
@@ -68,7 +97,7 @@
   function renderCard(book) {
     const card = create('article', 'book-card');
     const open = create('button', 'cover-button');
-    open.type = 'button'; open.setAttribute('aria-label', `подробнее: ${book.author}, ${book.title}`);
+    open.type = 'button'; open.setAttribute('aria-label', `подробнее: ${displayAuthor(book.author)}, ${book.title}`);
     open.append(cover(book)); open.addEventListener('click', () => showDetail(book));
     const info = create('div', 'card-info');
     const title = create('button', 'card-title', book.title);
@@ -79,7 +108,7 @@
     add.setAttribute('aria-label', `${selected.has(book.id) ? 'убрать из выбранных' : 'выбрать'}: ${book.title}`);
     add.addEventListener('click', () => toggle(book.id));
     bottom.append(create('strong', 'card-price', money(book.price)), add);
-    info.append(create('p', 'card-author', book.author), title);
+    info.append(create('p', 'card-author', displayAuthor(book.author)), title);
     if (book.category) info.append(create('p', 'card-category', book.category));
     info.append(bottom);
     card.append(open, info);
@@ -89,7 +118,7 @@
     const query = $('search').value.trim().toLocaleLowerCase('ru');
     const category = $('category').value;
     const sort = $('sort').value;
-    const list = books.filter(book => available(book) && (!category || book.category === category) && (!query || `${book.author} ${book.title}`.toLocaleLowerCase('ru').includes(query)));
+    const list = books.filter(book => available(book) && (!category || book.category === category) && (!query || `${book.author} ${displayAuthor(book.author)} ${book.title}`.toLocaleLowerCase('ru').includes(query)));
     if (sort === 'az') list.sort((a, b) => collator.compare(a.title, b.title) || collator.compare(a.author, b.author));
     if (sort === 'price-asc') list.sort((a, b) => a.price - b.price || collator.compare(a.title, b.title));
     if (sort === 'price-desc') list.sort((a, b) => b.price - a.price || collator.compare(a.title, b.title));
@@ -112,9 +141,6 @@
     $('header-count').hidden = copies === 0;
     $('selection-quantity').textContent = `${copies} ${copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг'}`;
     $('selection-total').textContent = money(items.reduce((sum, book) => sum + book.price * selected.get(book.id), 0));
-    $('telegram-button').disabled = items.length === 0;
-    $('whatsapp-button').disabled = items.length === 0;
-    $('message-fallback').hidden = true;
     $('selection-footer').hidden = items.length === 0;
     if (!items.length) {
       const empty = create('div', 'selection-empty');
@@ -126,7 +152,7 @@
     $('selection-items').replaceChildren(...items.map(book => {
       const row = create('div', 'selection-row');
       const details = create('div');
-      details.append(create('strong', '', book.title), create('p', '', book.author));
+      details.append(create('strong', '', book.title), create('p', '', displayAuthor(book.author)));
       const price = create('span', '', money(book.price * selected.get(book.id)));
       const remove = create('button', 'remove-button');
       remove.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7M10 11v5m4-5v5"/></svg>';
@@ -143,26 +169,6 @@
       row.append(thumb, details, price, controls, remove); return row;
     }));
   }
-  function message() {
-    const list = selectionBooks();
-    return `Здравствуйте! Меня интересуют книги CognitioVerum:\n${list.map((book, i) => `${i + 1}. ${book.author} — ${book.title} × ${selected.get(book.id)} — ${money(book.price * selected.get(book.id))}`).join('\n')}\n\nВсего: ${money(list.reduce((sum, book) => sum + book.price * selected.get(book.id), 0))}.\nПодскажите, пожалуйста, наличие, состояние и условия передачи.`;
-  }
-  function showFallback(value, hint) {
-    $('message-text').value = value;
-    $('message-fallback').hidden = false;
-    $('message-fallback').querySelector('p').textContent = hint;
-  }
-  function contact(channel) {
-    const value = message();
-    const url = channel === 'telegram' ? `https://t.me/${config.telegramUsername}` : config.whatsappUrl;
-    const name = channel === 'telegram' ? 'Telegram' : 'WhatsApp';
-    showFallback(value, `скопируйте список ниже и вставьте его в открывшийся чат ${name}.`);
-    // Открываем чат внутри пользовательского нажатия: Safari блокирует окна после await.
-    window.open(url, '_blank', 'noopener,noreferrer');
-    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(value).then(() => {
-      $('message-fallback').querySelector('p').textContent = `список скопирован. вставьте его в чат ${name}.`;
-    }).catch(() => {});
-  }
   function updateDetailAction() {
     const button = $('detail-add');
     const chosen = selected.has(activeBook.id);
@@ -174,9 +180,10 @@
     $('detail-cover').replaceChildren(cover(book, true));
     $('detail-category').textContent = book.category || '';
     $('detail-category').hidden = !book.category;
-    $('detail-author').textContent = book.author;
+    $('detail-author').textContent = displayAuthor(book.author);
     $('detail-title').textContent = book.title;
-    $('detail-description').textContent = book.description || 'описание этой книги скоро появится.';
+    $('detail-description').textContent = book.description || '';
+    $('detail-description').hidden = !book.description;
     $('detail-price').textContent = money(book.price);
     const extras = [];
     if (book.edition) extras.push(`издание: ${book.edition}`);
@@ -220,12 +227,8 @@
     document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closePanel()));
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); trapFocus(event); });
     $('detail-add').addEventListener('click', () => toggle(activeBook.id));
-    $('telegram-button').addEventListener('click', () => contact('telegram'));
-    $('whatsapp-button').addEventListener('click', () => contact('whatsapp'));
-    $('copy-button').addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText($('message-text').value); $('copy-button').textContent = 'скопировано ✓'; }
-      catch (_) { $('message-text').focus(); $('message-text').select(); $('copy-button').textContent = 'выделено, скопируйте текст'; }
-    });
+    $('telegram-button').href = `https://t.me/${config.telegramUsername || 'ribka_27'}`;
+    $('whatsapp-button').href = config.whatsappUrl || 'https://wa.me/message/MKN3QRCW27DUF1';
     for (const id of ['search', 'category', 'sort']) $(id).addEventListener(id === 'search' ? 'input' : 'change', () => { visibleLimit = pageSize; renderCatalog(); });
     $('load-more').addEventListener('click', () => { visibleLimit += pageSize; renderCatalog(); });
 
