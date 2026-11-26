@@ -97,3 +97,23 @@ body,button,input,select{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Te
 }
 @media(max-width:650px){.select-box:after{right:16px}}
 .card-description{font-size:12px;line-height:1.35;color:var(--wood);margin:0 0 8px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+
+/* Чёткая геометрия фильтров и собственное меню на десктопе. */
+.filters .search-box,.filters .select-box,.filters .select-box:last-child{height:48px;min-height:48px;border:1px solid rgba(25,59,54,.35);border-radius:12px;box-shadow:none}
+.filters .search-box:focus-within,.filters .select-box:focus-within,.filters .select-box.is-open{border-color:var(--brass)}
+.filter-trigger{display:none}
+@media(min-width:651px){
+  .select-box{z-index:1}
+  .select-box.is-open{z-index:6}
+  .select-box select{display:none}
+  .filter-trigger{display:block;width:100%;height:100%;padding:0 26px 0 0;border:0;background:transparent;color:var(--graphite);text-align:left;font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .filter-trigger:focus-visible{outline:0}
+  .filter-trigger:disabled{color:var(--wood);cursor:default}
+  .select-box.is-open:after{transform:translateY(-25%) rotate(225deg)}
+  .filter-menu{position:absolute;z-index:7;top:calc(100% + 6px);left:0;width:max-content;min-width:100%;max-width:min(320px,calc(100vw - 36px));max-height:min(360px,55vh);overflow-y:auto;padding:6px;background:var(--paper);border:1px solid rgba(25,59,54,.35);border-radius:12px;box-shadow:0 8px 22px rgba(25,59,54,.1)}
+  .filter-menu[hidden]{display:none}
+  .filter-option{display:block;width:100%;min-height:44px;padding:9px 12px;border:0;border-radius:8px;background:transparent;color:var(--graphite);text-align:left;font-size:14px;line-height:1.3;white-space:nowrap}
+  .filter-option:hover,.filter-option:focus-visible{background:rgba(25,59,54,.08);outline:0}
+  .filter-option[aria-checked="true"]{background:var(--pine);color:var(--paper)}
+}
+@media(max-width:650px){.filter-trigger,.filter-menu{display:none!important}.filters .search-box,.filters .select-box,.filters .select-box:last-child{height:44px;min-height:44px}}

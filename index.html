@@ -10,9 +10,9 @@
   <link rel="icon" type="image/png" sizes="512x512" href="assets/images/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <link rel="stylesheet" href="assets/css/refinements.css?v=05a">
+  <link rel="stylesheet" href="assets/css/refinements.css?v=05c">
   <script src="assets/js/config.js" defer></script>
-  <script src="assets/js/app.js?v=05b" defer></script>
+  <script src="assets/js/app.js?v=05c" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -35,8 +35,8 @@
       <div class="section-heading"><h2 id="catalog-title">книжная полка<span class="period">.</span></h2><p class="catalog-stat" id="catalog-stat" aria-live="polite">загружаем книги…</p></div>
       <div class="filters" role="search">
         <label class="search-box"><span class="sr-only">поиск по автору и названию</span><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="название или автор" autocomplete="off"></label>
-        <label class="select-box"><span class="sr-only">фильтр по жанру</span><select id="category"><option value="">все жанры</option></select></label>
-        <label class="select-box"><span class="sr-only">сортировка</span><select id="sort"><option value="default">по умолчанию</option><option value="az">по алфавиту</option><option value="price-asc">сначала дешевле</option><option value="price-desc">сначала дороже</option></select></label>
+        <div class="select-box"><select id="category" aria-label="фильтр по жанру"><option value="">все жанры</option></select><button class="filter-trigger" id="category-trigger" type="button" aria-label="фильтр по жанру" aria-expanded="false" aria-controls="category-menu" disabled>все жанры</button><div class="filter-menu" id="category-menu" role="menu" hidden></div></div>
+        <div class="select-box"><select id="sort" aria-label="сортировка"><option value="default">по умолчанию</option><option value="az">по алфавиту</option><option value="price-asc">сначала дешевле</option><option value="price-desc">сначала дороже</option></select><button class="filter-trigger" id="sort-trigger" type="button" aria-label="сортировка" aria-expanded="false" aria-controls="sort-menu">по умолчанию</button><div class="filter-menu" id="sort-menu" role="menu" hidden></div></div>
       </div>
       <p class="result-count" id="result-count" aria-live="polite" hidden></p>
       <div class="book-grid" id="book-grid" aria-live="polite"></div>

@@ -235,6 +235,64 @@
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
+  function closeFilterMenus() {
+    for (const id of ['category', 'sort']) {
+      $(id + '-menu').hidden = true;
+      $(id + '-trigger').setAttribute('aria-expanded', 'false');
+      $(id + '-trigger').parentElement.classList.remove('is-open');
+    }
+  }
+  function setupFilterMenu(id) {
+    const select = $(id), trigger = $(id + '-trigger'), menu = $(id + '-menu');
+    const options = () => [...menu.querySelectorAll('[role="menuitemradio"]')];
+    const sync = () => {
+      trigger.textContent = select.selectedOptions[0]?.textContent || '';
+      trigger.disabled = select.disabled;
+      menu.replaceChildren(...[...select.options].map(option => {
+        const item = create('button', 'filter-option', option.textContent);
+        item.type = 'button';
+        item.setAttribute('role', 'menuitemradio');
+        item.setAttribute('aria-checked', String(option.value === select.value));
+        item.addEventListener('click', () => {
+          select.value = option.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          closeFilterMenus();
+          trigger.focus();
+        });
+        return item;
+      }));
+    };
+    select.addEventListener('change', sync);
+    trigger.addEventListener('click', () => {
+      const opening = menu.hidden;
+      closeFilterMenus();
+      if (opening) {
+        menu.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        trigger.parentElement.classList.add('is-open');
+      }
+    });
+    trigger.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      event.preventDefault();
+      if (menu.hidden) trigger.click();
+      const items = options();
+      (event.key === 'ArrowUp' ? items.at(-1) : items.find(item => item.getAttribute('aria-checked') === 'true') || items[0])?.focus();
+    });
+    menu.addEventListener('keydown', event => {
+      const items = options(), index = items.indexOf(document.activeElement);
+      if (event.key === 'Escape') { event.preventDefault(); closeFilterMenus(); trigger.focus(); }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        items[(index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus();
+      }
+      if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault(); (event.key === 'Home' ? items[0] : items.at(-1))?.focus();
+      }
+    });
+    sync();
+    return sync;
+  }
   // Safari может игнорировать запрет масштабирования из viewport.
   // Блокируем только жесты масштабирования, сохраняя обычную прокрутку одним пальцем.
   document.addEventListener('gesturestart', event => event.preventDefault(), { passive: false });
@@ -243,6 +301,10 @@
     if (event.touches.length > 1) event.preventDefault();
   }, { passive: false });
   function init() {
+    const syncCategoryMenu = setupFilterMenu('category');
+    setupFilterMenu('sort');
+    document.addEventListener('click', event => { if (!event.target.closest('.select-box')) closeFilterMenus(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeFilterMenus(); });
     $('open-selection').addEventListener('click', () => { renderSelection(); openPanel($('selection-drawer')); });
     $('overlay').addEventListener('click', () => closePanel());
     document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closePanel()));
@@ -260,6 +322,7 @@
       const categories = [...new Set(availableBooks.map(book => book.category).filter(Boolean))].sort(collator.compare);
       $('category').append(...categories.map(category => { const option = create('option', '', category); option.value = category; return option; }));
       $('category').disabled = categories.length === 0;
+      syncCategoryMenu();
       const copies = availableBooks.reduce((sum, book) => sum + book.quantity, 0);
       const noun = copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг';
       $('catalog-stat').textContent = `${availableBooks.length} позиций · ${copies} ${noun} в наличии`;
