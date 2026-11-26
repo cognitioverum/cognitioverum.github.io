@@ -125,7 +125,8 @@
       const details = create('div');
       details.append(create('strong', '', book.title), create('p', '', book.author));
       const price = create('span', '', money(book.price * selected.get(book.id)));
-      const remove = create('button', 'remove-button', 'убрать');
+      const remove = create('button', 'remove-button');
+      remove.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7M10 11v5m4-5v5"/></svg>';
       remove.type = 'button'; remove.setAttribute('aria-label', `убрать: ${book.title}`);
       remove.addEventListener('click', () => toggle(book.id));
       const controls = create('div', 'quantity-controls');
@@ -134,6 +135,7 @@
       const plus = create('button', '', '+'); plus.type = 'button'; plus.disabled = selected.get(book.id) >= book.quantity;
       plus.setAttribute('aria-label', `увеличить количество: ${book.title}`); plus.addEventListener('click', () => adjust(book.id, 1));
       controls.append(minus, create('span', '', String(selected.get(book.id))), plus);
+      controls.hidden = book.quantity <= 1;
       const thumb = create('div', 'selection-thumb'); thumb.append(cover(book));
       row.append(thumb, details, price, controls, remove); return row;
     }));
@@ -183,13 +185,21 @@
   function openPanel(panel) {
     if (activePanel) closePanel(false);
     lastFocus = document.activeElement;
+    panel.classList.remove('is-closing');
     panel.hidden = false; $('overlay').hidden = false;
     document.body.classList.add('modal-open'); activePanel = panel;
     panel.querySelector('.icon-button')?.focus();
   }
   function closePanel(restore = true) {
     if (!activePanel) return;
-    activePanel.hidden = true; $('overlay').hidden = true;
+    const panel = activePanel;
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) panel.hidden = true;
+    else {
+      panel.classList.add('is-closing');
+      setTimeout(() => { if (panel.classList.contains('is-closing')) { panel.hidden = true; panel.classList.remove('is-closing'); } }, 190);
+    }
+    $('overlay').hidden = true;
     document.body.classList.remove('modal-open'); activePanel = null;
     if (restore && lastFocus?.isConnected) lastFocus.focus();
   }
