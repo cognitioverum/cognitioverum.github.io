@@ -239,7 +239,9 @@
       const categories = [...new Set(availableBooks.map(book => book.category).filter(Boolean))].sort(collator.compare);
       $('category').append(...categories.map(category => { const option = create('option', '', category); option.value = category; return option; }));
       $('category').disabled = categories.length === 0;
-      $('catalog-stat').textContent = `${availableBooks.reduce((sum, book) => sum + book.quantity, 0)} книг в наличии`;
+      const copies = availableBooks.reduce((sum, book) => sum + book.quantity, 0);
+      const noun = copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг';
+      $('catalog-stat').textContent = `${copies} ${noun} в наличии`;
       selected = new Map([...selected].map(([id, quantity]) => {
         const book = availableBooks.find(item => item.id === id);
         return book ? [id, Math.min(quantity, book.quantity)] : null;
