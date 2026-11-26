@@ -43,7 +43,7 @@
   }
   function placeholder() {
     const box = create('div', 'cover-placeholder');
-    box.append(create('span', 'placeholder-emblem', 'C V'), create('span', 'placeholder-line'), create('span', 'placeholder-copy', 'фотография скоро появится'));
+    box.append(create('span', 'placeholder-emblem', 'CV'));
     return box;
   }
   function toggle(id) {
@@ -71,12 +71,14 @@
     const title = create('button', 'card-title', book.title);
     title.type = 'button'; title.addEventListener('click', () => showDetail(book));
     const bottom = create('div', 'card-bottom');
-    const add = create('button', 'add-button', selected.has(book.id) ? 'выбрано ✓' : '+ выбрать');
+    const add = create('button', 'add-button', selected.has(book.id) ? '✓' : '+');
     add.type = 'button'; add.setAttribute('aria-pressed', String(selected.has(book.id)));
     add.setAttribute('aria-label', `${selected.has(book.id) ? 'убрать из выбранных' : 'выбрать'}: ${book.title}`);
     add.addEventListener('click', () => toggle(book.id));
     bottom.append(create('strong', 'card-price', money(book.price)), add);
-    info.append(create('p', 'card-author', book.author), title, create('p', 'card-category', book.category || 'жанр не указан'), bottom);
+    info.append(create('p', 'card-author', book.author), title);
+    if (book.category) info.append(create('p', 'card-category', book.category));
+    info.append(bottom);
     card.append(open, info);
     return card;
   }
@@ -93,7 +95,9 @@
   function renderCatalog() {
     const list = results();
     $('book-grid').replaceChildren(...list.slice(0, visibleLimit).map(renderCard));
-    $('result-count').textContent = `найдено: ${list.length}`;
+    const filtered = $('search').value.trim() || $('category').value;
+    $('result-count').hidden = !filtered;
+    $('result-count').textContent = filtered ? `найдено: ${list.length}` : '';
     $('empty-state').hidden = list.length !== 0 || books.length === 0;
     $('load-more').hidden = list.length <= visibleLimit;
   }
@@ -102,12 +106,20 @@
     const items = selectionBooks();
     const copies = items.reduce((sum, book) => sum + selected.get(book.id), 0);
     $('header-count').textContent = String(copies);
+    $('header-count').hidden = copies === 0;
     $('selection-quantity').textContent = `${copies} ${copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг'}`;
     $('selection-total').textContent = money(items.reduce((sum, book) => sum + book.price * selected.get(book.id), 0));
     $('telegram-button').disabled = items.length === 0;
     $('whatsapp-button').disabled = items.length === 0;
     $('message-fallback').hidden = true;
-    if (!items.length) { $('selection-items').replaceChildren(create('p', 'selection-empty', 'пока здесь пусто. добавьте книги из каталога.')); return; }
+    $('selection-footer').hidden = items.length === 0;
+    if (!items.length) {
+      const empty = create('div', 'selection-empty');
+      empty.innerHTML = '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 8h16l-1.2 12H5.2L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>';
+      empty.append(create('p', '', 'пока здесь пусто'));
+      const go = create('button', 'empty-go', 'к каталогу'); go.type = 'button'; go.addEventListener('click', () => { closePanel(); $('catalog').scrollIntoView({ behavior: 'smooth' }); });
+      empty.append(go); $('selection-items').replaceChildren(empty); return;
+    }
     $('selection-items').replaceChildren(...items.map(book => {
       const row = create('div', 'selection-row');
       const details = create('div');
@@ -122,7 +134,8 @@
       const plus = create('button', '', '+'); plus.type = 'button'; plus.disabled = selected.get(book.id) >= book.quantity;
       plus.setAttribute('aria-label', `увеличить количество: ${book.title}`); plus.addEventListener('click', () => adjust(book.id, 1));
       controls.append(minus, create('span', '', String(selected.get(book.id))), plus);
-      row.append(details, price, controls, remove); return row;
+      const thumb = create('div', 'selection-thumb'); thumb.append(cover(book));
+      row.append(thumb, details, price, controls, remove); return row;
     }));
   }
   function message() {
@@ -154,7 +167,8 @@
   function showDetail(book) {
     activeBook = book;
     $('detail-cover').replaceChildren(cover(book));
-    $('detail-category').textContent = book.category || 'жанр не указан';
+    $('detail-category').textContent = book.category || '';
+    $('detail-category').hidden = !book.category;
     $('detail-author').textContent = book.author;
     $('detail-title').textContent = book.title;
     $('detail-description').textContent = book.description || 'описание этой книги скоро появится.';
