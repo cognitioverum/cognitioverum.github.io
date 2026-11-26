@@ -117,3 +117,5 @@ body,button,input,select{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Te
   .filter-option[aria-checked="true"]{background:var(--pine);color:var(--paper)}
 }
 @media(max-width:650px){.filter-trigger,.filter-menu{display:none!important}.filters .search-box,.filters .select-box,.filters .select-box:last-child{height:44px;min-height:44px}}
+
+.selection-hint{margin:0 0 10px;color:var(--wood);font-size:12px;line-height:1.4}
