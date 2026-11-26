@@ -234,6 +234,13 @@
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
+  // Safari может игнорировать запрет масштабирования из viewport.
+  // Блокируем только жесты масштабирования, сохраняя обычную прокрутку одним пальцем.
+  document.addEventListener('gesturestart', event => event.preventDefault(), { passive: false });
+  document.addEventListener('gesturechange', event => event.preventDefault(), { passive: false });
+  document.addEventListener('touchmove', event => {
+    if (event.touches.length > 1) event.preventDefault();
+  }, { passive: false });
   function init() {
     $('open-selection').addEventListener('click', () => { renderSelection(); openPanel($('selection-drawer')); });
     $('overlay').addEventListener('click', () => closePanel());
