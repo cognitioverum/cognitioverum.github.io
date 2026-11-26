@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#193B36">
+  <meta name="description" content="каталог русскоязычных книг в Батуми. выберите интересующие книги и напишите нам в Telegram.">
+  <title>CognitioVerum · книги в Батуми</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="#top" aria-label="CognitioVerum, на главную">Cognitio<span>Verum</span></a>
+    <button class="selection-trigger" type="button" id="open-selection" aria-label="открыть выбранные книги">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 6.5h18v14H3zM7 3.5v3m10-3v3M7 11h10M7 15h7"/></svg>
+      <span class="selection-label">ваш выбор</span><span class="selection-count" id="header-count">0</span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <p class="eyebrow">БАТУМИ, ГРУЗИЯ <span class="eyebrow-rule"></span> независимая книжная полка</p>
+        <h1 id="hero-title">книги ищут<br><em>новый дом.</em></h1>
+        <div class="hero-bottom">
+          <div class="hero-copy"><p>коллекция русскоязычных книг, среди которых, возможно, найдётся именно та, которую вы давно искали.</p><p class="hero-secondary">художественная литература, психология, философия и многое другое.</p></div>
+          <a class="hero-link" href="#catalog">посмотреть книги <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <div class="hero-index" aria-hidden="true">01 / КОЛЛЕКЦИЯ</div>
+    </section>
+
+    <section class="catalog section-wrap" id="catalog" aria-labelledby="catalog-title">
+      <div class="section-heading"><div><p class="section-index">01 / каталог</p><h2 id="catalog-title">книжная полка<span class="period">.</span></h2><p class="section-subtitle">найдите что-нибудь для себя.</p></div><p class="catalog-stat" id="catalog-stat" aria-live="polite">загружаем книги…</p></div>
+      <div class="filters" role="search">
+        <label class="search-box"><span class="sr-only">поиск по автору и названию</span><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="название или автор" autocomplete="off"></label>
+        <label class="select-box"><span class="sr-only">фильтр по жанру</span><select id="category"><option value="">все жанры</option></select></label>
+        <label class="select-box"><span class="sr-only">сортировка</span><select id="sort"><option value="default">по порядку</option><option value="az">по алфавиту</option><option value="price-asc">сначала дешевле</option><option value="price-desc">сначала дороже</option></select></label>
+      </div>
+      <div class="catalog-meta"><span id="result-count" aria-live="polite"></span><span>цены в GEL / ₾</span></div>
+      <div class="book-grid" id="book-grid" aria-live="polite"></div>
+      <p class="empty-state" id="empty-state" hidden>по вашему запросу книг не нашлось. попробуйте другое название или жанр.</p>
+      <p class="error-state" id="error-state" hidden>каталог временно не загрузился. обновите страницу чуть позже.</p>
+      <button class="load-more" id="load-more" type="button" hidden>показать ещё <span aria-hidden="true">↓</span></button>
+    </section>
+
+    <section class="kadr" aria-labelledby="kadr-title"><div class="section-wrap kadr-inner"><div class="kadr-mark" aria-hidden="true">K.</div><div class="kadr-content"><p class="section-index">ещё один наш проект</p><p class="kadr-name">KADR.</p><h2 id="kadr-title">сохраняем важное<br><em>на бумаге.</em></h2><p>проект, посвящённый фотографии, дизайну и печати в Батуми. фотографии, открытки, книжные закладки, стикеры и постеры.</p><a id="kadr-link" class="text-link" hidden>познакомиться с KADR ↗</a><p id="kadr-pending" class="pending-link">ссылка на проект появится здесь позже.</p></div></div></section>
+  </main>
+
+  <footer class="footer"><div class="section-wrap footer-inner"><div><p class="footer-logo">CognitioVerum</p><p>книги, люди и истории.</p></div><p>Батуми, Грузия · 2026</p></div></footer>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="drawer" id="selection-drawer" role="dialog" aria-modal="true" aria-labelledby="selection-title" hidden><div class="panel-head"><div><p class="section-index">ваша полка</p><h2 id="selection-title">ваш выбор<span class="period">.</span></h2></div><button class="icon-button" type="button" data-close aria-label="закрыть выбранные книги">×</button></div><div class="selection-items" id="selection-items"></div><div class="selection-footer"><div class="total-row"><span>всего <span id="selection-quantity">0</span></span><strong id="selection-total">0 ₾</strong></div><button class="action-button" id="telegram-button" type="button">написать в Telegram ↗</button><p id="telegram-help" class="fine-print">наличие, состояние книг и условия передачи уточняются в переписке.</p><div class="message-fallback" id="message-fallback" hidden><p>скопируйте список и отправьте его нам в Telegram, когда контакт будет указан.</p><textarea id="message-text" readonly aria-label="текст сообщения"></textarea><button class="copy-button" id="copy-button" type="button">скопировать список</button></div></div></aside>
+
+  <div class="detail" id="book-detail" role="dialog" aria-modal="true" aria-labelledby="detail-title" hidden><button class="icon-button detail-close" type="button" data-close aria-label="закрыть описание книги">×</button><div class="detail-cover" id="detail-cover"></div><div class="detail-body"><p class="section-index" id="detail-category"></p><p class="detail-author" id="detail-author"></p><h2 id="detail-title"></h2><p class="detail-description" id="detail-description"></p><div class="detail-extra" id="detail-extra"></div><div class="detail-actions"><strong id="detail-price"></strong><button class="action-button" type="button" id="detail-add"></button></div></div></div>
+</body>
+</html>
