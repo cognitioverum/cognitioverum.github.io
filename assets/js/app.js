@@ -253,7 +253,7 @@
     for (const id of ['search', 'category', 'sort']) $(id).addEventListener(id === 'search' ? 'input' : 'change', () => { visibleLimit = pageSize; renderCatalog(); });
     $('load-more').addEventListener('click', () => { visibleLimit += pageSize; renderCatalog(); });
 
-    fetch('data/books.json').then(response => { if (!response.ok) throw Error('catalog unavailable'); return response.json(); }).then(data => {
+    fetch('data/books.json', { cache: 'no-store' }).then(response => { if (!response.ok) throw Error('catalog unavailable'); return response.json(); }).then(data => {
       if (!Array.isArray(data)) throw Error('invalid catalog');
       books = data.filter(book => book && typeof book.id === 'string' && typeof book.author === 'string' && typeof book.title === 'string' && Number.isFinite(book.price) && book.price >= 0);
       const availableBooks = books.filter(available);
