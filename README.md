@@ -29,6 +29,8 @@ node scripts/validate-catalog.mjs
 
 ## Публикация
 
-Workflow `.github/workflows/pages.yml` проверяет код и JSON в PR, а после слияния в `main` публикует через GitHub Pages. Для публикации нужно настроить Pages → Build and deployment → Source: GitHub Actions. **Не сливать PR и не запускать публикацию до отдельного подтверждения Дмитрия по правовым условиям.**
+Репозиторий организации: `cognitioverum/cognitioverum.github.io`. Сайт опубликован по адресу https://cognitioverum.github.io/.
 
-Текущий репозиторий `dmitriyribka27/cognitioverum` обычно публикуется по адресу `https://dmitriyribka27.github.io/cognitioverum/`. Адрес `https://cognitioverum.github.io/` требует GitHub аккаунт или организацию `cognitioverum` и репозиторий `cognitioverum.github.io` у этого владельца (либо отдельный домен); одного изменения workflow недостаточно.
+Workflow `.github/workflows/pages.yml` проверяет код и JSON в PR, а при обновлении ветки `main` публикует сайт через GitHub Pages. В настройках Pages источник публикации: GitHub Actions. После изменения ассортимента проверяйте валидатор каталога и результат workflow.
+
+Сайт показывает каталог и помогает составить сообщение для Telegram или WhatsApp. Он не резервирует книги и не принимает оплату; наличие, состояние и условия передачи уточняются в переписке.
