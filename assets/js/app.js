@@ -60,7 +60,7 @@
   }
   function cover(book, detail = false) {
     const frame = create('div', 'cover');
-    if (typeof book.image === 'string' && /^assets\/images\/books\/[\w.-]+\.(webp|jpe?g|png)$/i.test(book.image)) {
+    if (typeof book.image === 'string' && /^assets\/books\/[1-9]\d*\.png$/.test(book.image)) {
       const image = create('img');
       image.width = 288;
       image.height = 385;
@@ -109,6 +109,7 @@
     add.addEventListener('click', () => toggle(book.id));
     bottom.append(create('strong', 'card-price', money(book.price)), add);
     info.append(create('p', 'card-author', displayAuthor(book.author)), title);
+    if (book.description) info.append(create('p', 'card-description', book.description));
     if (book.category) info.append(create('p', 'card-category', book.category));
     info.append(bottom);
     card.append(open, info);
@@ -261,7 +262,7 @@
       $('category').disabled = categories.length === 0;
       const copies = availableBooks.reduce((sum, book) => sum + book.quantity, 0);
       const noun = copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг';
-      $('catalog-stat').textContent = `${copies} ${noun} в наличии`;
+      $('catalog-stat').textContent = `${availableBooks.length} позиций · ${copies} ${noun} в наличии`;
       selected = new Map([...selected].map(([id, quantity]) => {
         const book = availableBooks.find(item => item.id === id);
         return book ? [id, Math.min(quantity, book.quantity)] : null;
