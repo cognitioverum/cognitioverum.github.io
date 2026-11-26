@@ -171,6 +171,7 @@
     $('selection-quantity').textContent = `${copies} ${copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг'}`;
     $('selection-total').textContent = money(items.reduce((sum, book) => sum + book.price * selected.get(book.id), 0));
     $('selection-footer').hidden = items.length === 0;
+    if (items.length) updateContactLinks();
     if (!items.length) {
       const empty = create('div', 'selection-empty');
       empty.innerHTML = '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 8h16l-1.2 12H5.2L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>';
