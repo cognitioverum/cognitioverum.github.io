@@ -18,3 +18,8 @@ html{scroll-padding-top:calc(var(--header-height) + env(safe-area-inset-top) + 1
 @media(max-width:650px){.hero{padding-bottom:32px}.hero-copy{font-size:14px}.hero-copy .hero-secondary{font-size:12px;margin-top:8px!important}.filters{gap:8px}.search-box{height:44px;min-height:44px;border:1px solid var(--line);padding:0 14px}.select-box,.select-box:last-child{height:44px;min-height:44px;padding:0 13px;border:1px solid var(--line)}.drawer{border-radius:20px 20px 0 0;box-shadow:none;animation:sheet-in .2s ease-out both}.drawer.is-closing{animation:sheet-out .18s ease-in both}.contact-actions .action-button{min-height:44px;border-radius:12px}}
 @keyframes sheet-in{from{opacity:.5;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}@keyframes sheet-out{from{opacity:1;transform:translateY(0)}to{opacity:.5;transform:translateY(24px)}}
 @media(prefers-reduced-motion:reduce){.drawer,.drawer.is-closing,.overlay{animation:none}.add-button,.action-button{transition:none}}
+
+/* Фотографии 288 × 385: одинаковый слот без обрезки и увеличения исходника. */
+.cover{aspect-ratio:288 / 385;display:grid;place-items:center}
+.cover img{display:block;width:100%;height:100%;max-width:288px;max-height:385px;object-fit:contain;object-position:center}
+.detail-cover .cover{width:100%;max-width:288px}
