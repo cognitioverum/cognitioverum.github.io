@@ -85,3 +85,14 @@ html{scroll-padding-top:calc(var(--header-height) + env(safe-area-inset-top) + 1
 @media (max-width: 650px) {
   .filters input, .filters select { font-size: 16px; }
 }
+
+/* Единая типографика интерфейса и фиксированное положение стрелок фильтров. */
+body,button,input,select{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Arial,sans-serif}
+.select-box{position:relative}
+.select-box select{display:block;padding-right:26px;font-weight:400}
+.select-box:after{
+  content:"";position:absolute;right:18px;top:50%;width:6px;height:6px;
+  border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+  color:var(--wood);transform:translateY(-70%) rotate(45deg);pointer-events:none
+}
+@media(max-width:650px){.select-box:after{right:16px}}
