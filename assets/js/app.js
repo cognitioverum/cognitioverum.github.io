@@ -105,6 +105,7 @@
     $('selection-quantity').textContent = `${copies} ${copies % 10 === 1 && copies % 100 !== 11 ? 'книга' : copies % 10 >= 2 && copies % 10 <= 4 && (copies % 100 < 12 || copies % 100 > 14) ? 'книги' : 'книг'}`;
     $('selection-total').textContent = money(items.reduce((sum, book) => sum + book.price * selected.get(book.id), 0));
     $('telegram-button').disabled = items.length === 0;
+    $('whatsapp-button').disabled = items.length === 0;
     $('message-fallback').hidden = true;
     if (!items.length) { $('selection-items').replaceChildren(create('p', 'selection-empty', 'пока здесь пусто. добавьте книги из каталога.')); return; }
     $('selection-items').replaceChildren(...items.map(book => {
@@ -133,17 +134,16 @@
     $('message-fallback').hidden = false;
     $('message-fallback').querySelector('p').textContent = hint;
   }
-  async function contact() {
+  function contact(channel) {
     const value = message();
-    const username = String(config.telegramUsername || '').replace(/^@/, '').trim();
-    if (!/^[A-Za-z][A-Za-z0-9_]{4,31}$/.test(username)) {
-      showFallback(value, 'контакт Telegram пока не указан. можно скопировать список книг для переписки позже.');
-      return;
-    }
-    let copied = false;
-    try { await navigator.clipboard.writeText(value); copied = true; } catch (_) { /* ручное копирование */ }
-    showFallback(value, copied ? 'список скопирован. вставьте его в открывшийся чат Telegram.' : 'скопируйте список ниже и вставьте его в открывшийся чат Telegram.');
-    window.open(`https://t.me/${username}`, '_blank', 'noopener,noreferrer');
+    const url = channel === 'telegram' ? `https://t.me/${config.telegramUsername}` : config.whatsappUrl;
+    const name = channel === 'telegram' ? 'Telegram' : 'WhatsApp';
+    showFallback(value, `скопируйте список ниже и вставьте его в открывшийся чат ${name}.`);
+    // Открываем чат внутри пользовательского нажатия: Safari блокирует окна после await.
+    window.open(url, '_blank', 'noopener,noreferrer');
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(value).then(() => {
+      $('message-fallback').querySelector('p').textContent = `список скопирован. вставьте его в чат ${name}.`;
+    }).catch(() => {});
   }
   function updateDetailAction() {
     const button = $('detail-add');
@@ -193,7 +193,8 @@
     document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closePanel()));
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closePanel(); trapFocus(event); });
     $('detail-add').addEventListener('click', () => toggle(activeBook.id));
-    $('telegram-button').addEventListener('click', contact);
+    $('telegram-button').addEventListener('click', () => contact('telegram'));
+    $('whatsapp-button').addEventListener('click', () => contact('whatsapp'));
     $('copy-button').addEventListener('click', async () => {
       try { await navigator.clipboard.writeText($('message-text').value); $('copy-button').textContent = 'скопировано ✓'; }
       catch (_) { $('message-text').focus(); $('message-text').select(); $('copy-button').textContent = 'выделено, скопируйте текст'; }

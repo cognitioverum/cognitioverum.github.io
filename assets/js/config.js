@@ -1,2 +1,1 @@
-// заполнить после получения подтверждённых адресов. Telegram: имя без @ и ссылки.
-window.COGNITIO_CONFIG = Object.freeze({ telegramUsername: "" });
+window.COGNITIO_CONFIG = Object.freeze({ telegramUsername: "ribka_27", whatsappUrl: "https://wa.me/message/MKN3QRCW27DUF1" });
