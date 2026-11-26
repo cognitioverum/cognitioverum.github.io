@@ -77,3 +77,11 @@ html{scroll-padding-top:calc(var(--header-height) + env(safe-area-inset-top) + 1
 .detail,.detail.is-closing,.overlay,.overlay.is-closing{animation:none}
 .detail-description{min-height:3.9em;line-height:1.3}
 .hero h1{letter-spacing:-.04em}
+
+/* На телефоне жесты сохраняют прокрутку без масштабирования страницы. */
+@media (pointer: coarse) {
+  html { touch-action: pan-x pan-y; }
+}
+@media (max-width: 650px) {
+  .filters input, .filters select { font-size: 16px; }
+}
