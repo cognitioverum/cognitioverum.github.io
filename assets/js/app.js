@@ -41,8 +41,6 @@
   let activeBook = null;
   let lastFocus = null;
   let activePanel = null;
-  let closingPanel = null;
-  let closingTimer = null;
 
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -194,24 +192,9 @@
     updateDetailAction();
     openPanel($('book-detail'));
   }
-  function finishClose(panel, restore) {
-    panel.hidden = true;
-    panel.classList.remove('is-closing');
-    if (closingPanel === panel) closingPanel = null;
-    if (!activePanel) {
-      $('overlay').hidden = true;
-      $('overlay').classList.remove('is-closing');
-      document.body.classList.remove('modal-open');
-      if (restore && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
-    }
-  }
   function openPanel(panel) {
-    if (closingTimer) { clearTimeout(closingTimer); closingTimer = null; }
-    if (closingPanel) finishClose(closingPanel, false);
-    if (activePanel) finishClose(activePanel, false);
+    if (activePanel) closePanel(false);
     lastFocus = document.activeElement;
-    panel.classList.remove('is-closing');
-    $('overlay').classList.remove('is-closing');
     panel.hidden = false;
     $('overlay').hidden = false;
     document.body.classList.add('modal-open');
@@ -220,17 +203,11 @@
   }
   function closePanel(restore = true) {
     if (!activePanel) return;
-    const panel = activePanel;
+    activePanel.hidden = true;
+    $('overlay').hidden = true;
+    document.body.classList.remove('modal-open');
     activePanel = null;
-    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) { finishClose(panel, restore); return; }
-    closingPanel = panel;
-    panel.classList.add('is-closing');
-    $('overlay').classList.add('is-closing');
-    closingTimer = setTimeout(() => {
-      closingTimer = null;
-      finishClose(panel, restore);
-    }, 170);
+    if (restore && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
   }
   function trapFocus(event) {
     if (!activePanel || event.key !== 'Tab') return;
